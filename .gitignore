@@ -3,3 +3,5 @@ venv
 test.py
 config.py
 requirements.txt
+.idea
+__pycache__/
