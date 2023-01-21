@@ -1,6 +1,16 @@
-from config import dp, bot
-from aiogram import types, Dispatcher
-ADMINS = [620663358,]
+from aiogram import types
+
+async def example(message: types.Message):
+    """
+    просто тестовая функция чтоб получать в логах сведения о сообщениях
+    """
+    print(f"{message.chat.type=}")
+    print(f"{message.reply_to_message=}")
+    print(f"{message.from_user.id=}")
+    if message.chat.type != 'private':
+        admins = await message.chat.get_administrators()
+        print(admins)
+
 
 async def check_user_is_admin(message: types.Message):
     """
@@ -14,14 +24,28 @@ async def check_user_is_admin(message: types.Message):
     return False
 
 
-async def echo(message: types.Message):
-    bad_words = ['java', 'html', 'дурак', "дура"]
-    username = f"@{message.from_user.username}" \
-        if message.from_user.username is not None else message.from_user.first_name
-    for word in bad_words:
-        if word in message.text.lower().replace(' ', ''):
-            await message.reply(f"Админ удалите {username} из группы")
+async def check_curses(message: types.Message):
+    """
+    проверка, содержит ли сообщение плохие слова
+    """
+    BAD_WORDS = ["дурак", "дурачок", "лох", "идиот", "придурок", "урод", "додик", "имбицил", "хрен", "хер", "ничтожество",
+                 'сука', 'блять', 'хуйня', 'пидр', 'мразь', 'еблан', 'хуила', 'далбаеб', 'конченный']
+    if message.chat.type != 'private':
+        for word in BAD_WORDS:
+            if word in message.text.lower().replace(' ', ''):
+                await message.reply(text=f' Пользователь {message.from_user.first_name} отправил запрещенное слово \n'
+                                         f'Админы забанить {message.from_user.first_name}: Да\Нет')
+                break
 
+async def pin_messages(message: types.Message):
+    """
+    обработчик, чтобы делать закреп сообщения через команду
+    """
+    print(message.text)  # "!pin"
+    if message.chat.type != 'private':
+        admin_author = await check_user_is_admin(message)
+        if admin_author and message.reply_to_message:
+            await message.reply_to_message.pin()
 
 
 async def ban_user(message: types.Message):
@@ -33,6 +57,19 @@ async def ban_user(message: types.Message):
         admin_author = await check_user_is_admin(message)
         print(f"{admin_author=}")
         if admin_author and message.reply_to_message:
+            await message.bot.ban_chat_member(
+                chat_id=message.chat.id,
+                user_id=message.reply_to_message.from_user.id
+            )
+async def yes_no(message: types.Message):
+    '''
+    Функция обрабатывает ответы администраторов беседы и банит пользователя
+    '''
+    if message.chat.type != 'private':
+        answer_admin = await check_user_is_admin(message)
+        print(answer_admin)
+        if answer_admin and message.reply_to_message:
+            # await message.reply(message.reply_to_message.from_user.username)
             await message.bot.ban_chat_member(
                 chat_id=message.chat.id,
                 user_id=message.reply_to_message.from_user.id

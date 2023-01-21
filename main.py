@@ -2,10 +2,17 @@ from handlers.start import start_command
 from handlers.help import help_command
 from handlers.shop import shop_start, address
 #from handlers.pictures import photo
+from check_admin import *
 from handlers.info import info_command
 from handlers.shop_categories import show_pizza
 #from handlers.all_messages import echo
-from handlers.group_moder import ban_user, echo
+from handlers.group_moder import (
+ example,
+ check_curses,
+ pin_messages,
+ ban_user,
+ yes_no
+)
 from aiogram import executor, Bot, Dispatcher, types
 from aiogram.dispatcher.filters import Text
 from dotenv import load_dotenv
@@ -26,8 +33,11 @@ if __name__ == "__main__":
     dp.register_callback_query_handler(shop_start, text='shop_start')
     dp.register_message_handler(show_pizza, Text(equals='Хочу пиццы'))
     dp.register_callback_query_handler(address,Text(equals='address'))
-    dp.register_message_handler(echo)
-    dp.register_message_handler(ban_user,commands=['да'],commands_prefix='!')
+
+    dp.register_message_handler(yes_no, commands=['да'], commands_prefix=['!'])
+    dp.register_message_handler(check_curses)
+    dp.register_message_handler(pin_messages, commands=['pin'], commands_prefix='!/')
+    dp.register_message_handler(ban_user, commands=['ban'], commands_prefix='!/')
     @dp.message_handler(commands=['picture'])
     async def photo(message: types.Message):
         photos = (
